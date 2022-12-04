@@ -15,8 +15,8 @@ func Test_splitInput(t *testing.T) {
 		want []string
 	}{
 		{"empty", args{""}, nil},
-		{"one elf", args{"500\n500\n100"}, []string{"500\n500\n100"}},
-		{"two elf", args{"500\n500\n100\n\n500\n100"}, []string{"500\n500\n100", "500\n100"}},
+		{"one elf", args{"500\r\n500\r\n100"}, []string{"500\r\n500\r\n100"}},
+		{"two elf", args{"500\r\n500\r\n100\r\n\r\n500\r\n100"}, []string{"500\r\n500\r\n100", "500\r\n100"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -37,7 +37,7 @@ func Test_sumString(t *testing.T) {
 		want int
 	}{
 		{"empty case", args{""}, 0},
-		{"one elf", args{"500\n500\n100"}, 1100},
+		{"one elf", args{"500\r\n500\r\n100"}, 1100},
 	}
 
 	for _, tt := range tests {
