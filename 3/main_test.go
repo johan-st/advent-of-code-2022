@@ -99,3 +99,24 @@ func Test_findDuplicate(t *testing.T) {
 		})
 	}
 }
+
+func Test_idTeam(t *testing.T) {
+	type args struct {
+		in0 []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want rune
+	}{
+		{"sample_1", args{[]string{"vJrwpWtwJgWrhcsFMMfFFhFp", "jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL", "PmmdzqPrVvPwwTWBwgJ"}}, 'r'},
+		{"sample_2", args{[]string{"wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn", "ttgJtRGJQctTZtZT", "CrZsJsPPZsGzwwsLwLmpwMDw"}}, 'Z'},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := idTeam(tt.args.in0); got != tt.want {
+				t.Errorf("idTeam() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

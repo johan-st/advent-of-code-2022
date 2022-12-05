@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strings"
 )
@@ -27,6 +28,25 @@ func main() {
 	// print score
 	println("total priority: ", score)
 
+	// PART 2
+	// split input in teams of 3
+	teams := getTeams(splitInput)
+
+	// find the common item among them
+	badges := []rune{}
+	for _, t := range teams {
+		badges = append(badges, idTeam(t))
+	}
+
+	// score these items
+	score2 := 0
+	for _, b := range badges {
+		fmt.Println(string(b), scoreItem(b))
+		score2 += scoreItem(b)
+	}
+
+	// print score
+	fmt.Println("teams aggregate priority: ", score2)
 }
 
 func load(filename string) string {
@@ -59,4 +79,34 @@ func scoreItem(d rune) int {
 	} else {
 		return (int(d) - 38)
 	}
+}
+
+// PART 2
+func getTeams(packs []string) [][]string {
+	teams := [][]string{}
+	for i, pack := range packs {
+		num := int(i / 3)
+		if len(teams) < num+1 {
+			teams = append(teams, []string{})
+		}
+		teams[num] = append(teams[num], pack)
+	}
+	return teams
+}
+
+func idTeam(team []string) rune {
+	if len(team) != 3 {
+		str := fmt.Sprintf("found %d teams. Must be 3.", len(team))
+		panic(str)
+	}
+	p1 := team[0]
+	p2 := team[1]
+	p3 := team[2]
+	for _, r := range p1 {
+		if strings.ContainsRune(p2, r) && strings.ContainsRune(p3, r) {
+			fmt.Println(string(r))
+			return r
+		}
+	}
+	panic("nope")
 }
