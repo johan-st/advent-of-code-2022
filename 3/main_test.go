@@ -69,7 +69,7 @@ func Test_scoreDuplicate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := scoreDuplicate(tt.args.d); got != tt.want {
+			if got := scoreItem(tt.args.d); got != tt.want {
 				t.Errorf("scoreDuplicate() = %v, want %v", got, tt.want)
 			}
 		})

@@ -21,11 +21,12 @@ func main() {
 	// score duplicates
 	score := 0
 	for _, d := range duplicates {
-		score += scoreDuplicate(d)
+		score += scoreItem(d)
 	}
 
 	// print score
-	println(score)
+	println("total priority: ", score)
+
 }
 
 func load(filename string) string {
@@ -52,7 +53,7 @@ func findDuplicates(in string) rune {
 	return 0
 }
 
-func scoreDuplicate(d rune) int {
+func scoreItem(d rune) int {
 	if d > 90 {
 		return (int(d) - 96)
 	} else {
