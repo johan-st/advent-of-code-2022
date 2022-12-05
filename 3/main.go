@@ -13,7 +13,10 @@ func main() {
 	splitInput := strings.Split(input, "\r\n")
 
 	// Find duplicates
-	duplicates := findDuplicates(splitInput)
+	duplicates := ""
+	for _, s := range splitInput {
+		duplicates += string(findDuplicates(s))
+	}
 
 	// score duplicates
 	score := 0
@@ -34,12 +37,19 @@ func load(filename string) string {
 	return string(input)
 }
 
-func findDuplicates(in []string) []rune {
+func findDuplicates(in string) rune {
 	if len(in)%2 != 0 || len(in) == 0 {
-		return []rune{}
+		return 0
 	}
-	return []rune{'a'}
-	// return []rune{rune(in[0][0]), rune(in[1][0])}
+	half := int(len(in) / 2)
+	h := in[:half]
+	t := in[half:]
+	for _, r := range h {
+		if strings.ContainsRune(t, r) {
+			return r
+		}
+	}
+	return 0
 }
 
 func scoreDuplicate(d rune) int {

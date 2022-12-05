@@ -76,19 +76,20 @@ func Test_scoreDuplicate(t *testing.T) {
 	}
 }
 
-func Test_findDuplicates(t *testing.T) {
+func Test_findDuplicate(t *testing.T) {
 	type args struct {
-		in []string
+		in string
 	}
 	tests := []struct {
 		name string
 		args args
-		want []rune
+		want rune
 	}{
-		{"empty string", args{[]string{""}}, []rune{}},
-		{"single character", args{[]string{"a"}}, []rune{}},
-		{"two characters", args{[]string{"a", "b"}}, []rune{}},
-		{"two characters", args{[]string{"a", "a"}}, []rune{'a'}},
+		{"empty string", args{""}, 0},
+		{"single character", args{"a"}, 0},
+		{"two characters, different", args{"ab"}, 0},
+		{"two characters, same", args{"aa"}, 'a'},
+		{"test string", args{"vJrwpWtwJgWrhcsFMMfFFhFp"}, 'p'},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
