@@ -11,7 +11,7 @@
 //
 // Internally it uses a dynamically growing slice of blocks, resulting in faster
 // resizes than a simple dynamic array/slice would allow.
-package util
+package stack
 
 // The size of a block of data
 const blockSize = 4096
