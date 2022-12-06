@@ -16,7 +16,10 @@ func main() {
 	movesStr := splitInput[1]
 	state := cargo{}.fromString(initialStateStr, 9)
 	moves := moves{}.fromString(movesStr)
-	state.applyMoves(moves)
+	// state.applyMoves(moves) // Part 1
+	state.applyMovesV2(moves) // Part 2
+
+	// PRINTOUTS
 	// fmt.Printf("MOVES:\n%s", moves.toString())
 	fmt.Printf("TOP: %s", state.top())
 	// fmt.Printf("CARGO:\n%s", state.toString())
@@ -83,6 +86,21 @@ func (c cargo) applyMoves(m moves) {
 func (c cargo) applyMove(m move) {
 	for i := 0; i < m.itterations; i++ {
 		c[m.to-1].Push(c[m.from-1].Pop())
+	}
+}
+
+func (c cargo) applyMovesV2(m moves) {
+	for _, move := range m {
+		c.applyMoveV2(move)
+	}
+}
+func (c cargo) applyMoveV2(m move) {
+	moving := s.New()
+	for i := 0; i < m.itterations; i++ {
+		moving.Push(c[m.from-1].Pop())
+	}
+	for !moving.Empty() {
+		c[m.to-1].Push(moving.Pop())
 	}
 }
 
