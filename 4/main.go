@@ -12,14 +12,20 @@ func main() {
 	input := load("input.txt")
 	pairs := parsePairs(input)
 	numContained := 0
+	numOverlap := 0
 	for i, p := range pairs {
 		contained := zonesFullyContained(p.firstZones, p.secondZones)
-		fmt.Println(i, ":", p, " - ", contained)
+		overlap := zonesOverlap(p.firstZones, p.secondZones)
+		fmt.Println(i+1, ":", p, " -contained:", contained, " -overlap:", overlap)
 		if contained {
 			numContained++
 		}
+		if overlap {
+			numOverlap++
+		}
 	}
 	fmt.Println("Number of pairs fully contained:", numContained)
+	fmt.Println("Number of pairs with overlap:", numOverlap)
 }
 
 func load(filename string) string {
@@ -81,6 +87,23 @@ func zonesFullyContained(z1 zones, z2 zones) bool {
 		return true
 	}
 	if z2.from >= z1.from && z2.to <= z1.to {
+		return true
+	}
+	return false
+}
+
+// PART 2
+func zonesOverlap(z1 zones, z2 zones) bool {
+	if z1.from >= z2.from && z1.from <= z2.to {
+		return true
+	}
+	if z1.to >= z2.from && z1.to <= z2.to {
+		return true
+	}
+	if z2.from >= z1.from && z2.from <= z1.to {
+		return true
+	}
+	if z2.to >= z1.from && z2.to <= z1.to {
 		return true
 	}
 	return false
