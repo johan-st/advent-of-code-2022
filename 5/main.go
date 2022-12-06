@@ -14,14 +14,19 @@ func main() {
 	splitInput := strings.Split(input, "\r\n\r\n")
 	initialStateStr := splitInput[0]
 	movesStr := splitInput[1]
-	state := cargo{}.fromString(initialStateStr, 9)
-	moves := moves{}.fromString(movesStr)
-	// state.applyMoves(moves) // Part 1
-	state.applyMovesV2(moves) // Part 2
+	state := Cargo{}.fromString(initialStateStr, 9)
+	moves := Moves{}.fromString(movesStr)
+	state.applyMoves(moves) // Part 1
+
+	// part2
+	state2 := Cargo{}.fromString(initialStateStr, 9)
+	moves2 := Moves{}.fromString(movesStr)
+	state2.applyMovesV2(moves2)
 
 	// PRINTOUTS
 	// fmt.Printf("MOVES:\n%s", moves.toString())
-	fmt.Printf("TOP: %s", state.top())
+	fmt.Printf("TOP 1: %s", state.top())
+	fmt.Printf("TOP 2: %s", state2.top())
 	// fmt.Printf("CARGO:\n%s", state.toString())
 }
 
@@ -29,9 +34,9 @@ func main() {
 type move struct {
 	from, to, itterations int
 }
-type moves []move
+type Moves []move
 
-func (m moves) toString() string {
+func (m Moves) toString() string {
 	str := ""
 	for _, move := range m {
 
@@ -40,7 +45,7 @@ func (m moves) toString() string {
 	return str
 }
 
-func (m moves) fromString(str string) moves {
+func (m Moves) fromString(str string) Moves {
 	rows := strings.Split(str, "\r\n")
 	for _, row := range rows {
 		if row != "" {
@@ -76,25 +81,25 @@ func parseMove(str string) move {
 }
 
 // CARGO is a number of stacks
-type cargo []*s.Stack
+type Cargo []*s.Stack
 
-func (c cargo) applyMoves(m moves) {
+func (c Cargo) applyMoves(m Moves) {
 	for _, move := range m {
 		c.applyMove(move)
 	}
 }
-func (c cargo) applyMove(m move) {
+func (c Cargo) applyMove(m move) {
 	for i := 0; i < m.itterations; i++ {
 		c[m.to-1].Push(c[m.from-1].Pop())
 	}
 }
 
-func (c cargo) applyMovesV2(m moves) {
+func (c Cargo) applyMovesV2(m Moves) {
 	for _, move := range m {
 		c.applyMoveV2(move)
 	}
 }
-func (c cargo) applyMoveV2(m move) {
+func (c Cargo) applyMoveV2(m move) {
 	moving := s.New()
 	for i := 0; i < m.itterations; i++ {
 		moving.Push(c[m.from-1].Pop())
@@ -104,14 +109,13 @@ func (c cargo) applyMoveV2(m move) {
 	}
 }
 
-func (c cargo) fromString(initialStateStr string, numSpaces int) cargo {
-	temp := cargo{}
+func (c Cargo) fromString(initialStateStr string, numSpaces int) Cargo {
+	temp := Cargo{}
 	for i := 0; i < numSpaces; i++ {
 		temp = append(temp, s.New())
 	}
 	rows := strings.Split(initialStateStr, "\r\n")
 	for i, row := range rows {
-		fmt.Println(i, ":", row)
 		if i != len(rows)-1 {
 			for j := 0; j < numSpaces; j++ {
 				r := row[j*4+1 : j*4+2]
@@ -126,7 +130,6 @@ func (c cargo) fromString(initialStateStr string, numSpaces int) cargo {
 		c = append(c, s.New())
 		addStackInReverse(c[i], temp[i])
 	}
-	fmt.Println(temp.toString())
 	return c
 }
 func addStackInReverse(dest *s.Stack, src *s.Stack) {
@@ -137,9 +140,9 @@ func addStackInReverse(dest *s.Stack, src *s.Stack) {
 
 // NOTE: This is destructive!
 // Returns a string representation of the cargo state.
-func (c cargo) toString() string {
+func (c Cargo) toString() string {
 	topHeight := 0
-	tmpC := cargo(c)
+	tmpC := Cargo(c)
 	for _, b := range c {
 		if b.Size() > topHeight {
 			topHeight = b.Size()
@@ -159,7 +162,7 @@ func (c cargo) toString() string {
 	return str
 }
 
-func (c cargo) top() string {
+func (c Cargo) top() string {
 	str := ""
 	for _, b := range c {
 		if b.Empty() {
