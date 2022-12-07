@@ -42,7 +42,7 @@ func main() {
 	}
 
 	// Print filesystem
-	fmt.Printf("TOTAL SIZE: %d\n", fs.size())
+	// fmt.Printf("%vTOTAL SIZE: %d\n", fs, fs.size())
 
 	// Find total size of directories less than 100000 in size
 	fmt.Printf("SIZE PART 1: %d\n", part1(fs))
