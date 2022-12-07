@@ -10,7 +10,7 @@ import (
 
 func main() {
 	// Read input
-	input := strings.Split(u.Load("sample.txt"), "\r\n")
+	input := strings.Split(u.Load("input.txt"), "\r\n")
 
 	// parse into filesystem
 	fs := newDir("/")
@@ -41,11 +41,24 @@ func main() {
 	}
 
 	// Print filesystem
-	fmt.Printf("_________OUTPUT_________\n%vTOTAL SIZE: %d", fs, fs.size())
+	fmt.Printf("%vTOTAL SIZE: %d\n", fs, fs.size())
 
 	// Find total size of directories less than 100000 in size
+	sizesForP1 := part1(fs)
 
 	// Print total size
+	fmt.Printf("SIZE PART 1: %d\n", sizesForP1)
+}
+
+func part1(fs dir) int {
+	size := 0
+	for _, d := range fs.dirs {
+		if d.size() < 100000 {
+			size += d.size()
+		}
+		size += part1(d)
+	}
+	return size
 }
 
 func (d dir) at(pos []string) dir {
