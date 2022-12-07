@@ -10,8 +10,10 @@ func main() {
 	input := u.Load("input.txt")
 
 	pos := findMarker(4, input)
+	pos2 := findMarker(14, input)
 
-	fmt.Printf("marker: %d", pos)
+	fmt.Printf("marker 1: %d\n", pos)
+	fmt.Printf("marker 2: %d\n", pos2)
 }
 
 func findMarker(size int, input string) int {
