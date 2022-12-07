@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -44,10 +45,19 @@ func main() {
 	fmt.Printf("%vTOTAL SIZE: %d\n", fs, fs.size())
 
 	// Find total size of directories less than 100000 in size
-	sizesForP1 := part1(fs)
+	fmt.Printf("SIZE PART 1: %d\n", part1(fs))
 
-	// Print total size
-	fmt.Printf("SIZE PART 1: %d\n", sizesForP1)
+	// part 2
+	diskSize := 70000000
+	diskNeeded := 30000000
+	diskUsed := fs.size()
+	diskFree := diskSize - diskUsed
+	diskToFree := diskNeeded - diskFree
+
+	// fmt.Printf("free on disk: %d\nneeded: %d\nspace to free: %d\n", diskFree, diskNeeded, diskToFree)
+	// fmt.Printf("smallest dir larger than %d\n", diskToFree)
+	fmt.Printf("SIZE PART 2: %d\n", part2(fs, diskToFree))
+
 }
 
 func part1(fs dir) int {
@@ -59,6 +69,23 @@ func part1(fs dir) int {
 		size += part1(d)
 	}
 	return size
+}
+
+func part2(d dir, sizeNeeded int) int {
+	sizes := []int{}
+	for _, d := range d.dirs {
+		if d.size() >= sizeNeeded {
+			sizes = append(sizes, d.size())
+		}
+		sizes = append(sizes, part2(d, sizeNeeded))
+	}
+	if len(sizes) > 0 {
+
+		sort.Ints(sizes)
+		return sizes[0]
+	} else {
+		return 70000000
+	}
 }
 
 func (d dir) at(pos []string) dir {
