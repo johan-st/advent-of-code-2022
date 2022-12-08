@@ -17,7 +17,7 @@ func main() {
 	fmt.Println("Part 1, visible trees: ", f.numVisible(), "out of:", len(f)*len(f[0]), "(", len(f), "x", len(f[0]), ")")
 
 	// part 2
-	fmt.Println("Part 2, most scenic tree: ", mostScenicTree(f))
+	fmt.Println("Part 2, highest scenic value: ", mostScenicTree(f))
 
 }
 
