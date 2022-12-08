@@ -5,19 +5,22 @@ import (
 	"testing"
 )
 
+func newT(height int) tree {
+	return tree{height: height}
+}
 func sampleString() string {
 	return "30373\r\n25512\r\n65332\r\n33549\r\n35390"
 }
 func directionalForests() [4]forest {
-	sampleForestLeft := forest{[]int{2, 2, 2}, []int{1, 2, 2}, []int{2, 2, 2}}
-	sampleForestRight := forest{[]int{2, 2, 2}, []int{2, 2, 1}, []int{2, 2, 2}}
-	sampleForestUp := forest{[]int{2, 1, 2}, []int{2, 2, 2}, []int{2, 2, 2}}
-	sampleForestDown := forest{[]int{2, 2, 2}, []int{2, 2, 2}, []int{2, 1, 2}}
+	sampleForestLeft := forest{[]tree{newT(2), newT(2), newT(2)}, []tree{newT(1), newT(2), newT(2)}, []tree{newT(2), newT(2), newT(2)}}
+	sampleForestRight := forest{[]tree{newT(2), newT(2), newT(2)}, []tree{newT(2), newT(2), newT(1)}, []tree{newT(2), newT(2), newT(2)}}
+	sampleForestUp := forest{[]tree{newT(2), newT(1), newT(2)}, []tree{newT(2), newT(2), newT(2)}, []tree{newT(2), newT(2), newT(2)}}
+	sampleForestDown := forest{[]tree{newT(2), newT(2), newT(2)}, []tree{newT(2), newT(2), newT(2)}, []tree{newT(2), newT(1), newT(2)}}
 	return [4]forest{sampleForestLeft, sampleForestRight, sampleForestUp, sampleForestDown}
 }
 
 func sampleForest() forest {
-	return forest{[]int{3, 0, 3, 7, 3}, []int{2, 5, 5, 1, 2}, []int{6, 5, 3, 3, 2}, []int{3, 3, 5, 4, 9}, []int{3, 5, 3, 9, 0}}
+	return forest{[]tree{newT(3), newT(0), newT(3), newT(7), newT(3)}, []tree{newT(2), newT(5), newT(5), newT(1), newT(2)}, []tree{newT(6), newT(5), newT(3), newT(3), newT(2)}, []tree{newT(3), newT(3), newT(5), newT(4), newT(9)}, []tree{newT(3), newT(5), newT(3), newT(9), newT(0)}}
 }
 func Test_forest_String(t *testing.T) {
 	f := sampleForest()

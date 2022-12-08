@@ -15,20 +15,43 @@ func main() {
 
 	// part 1
 	fmt.Println("Part 1, visible trees: ", f.numVisible(), "out of:", len(f)*len(f[0]), "(", len(f), "x", len(f[0]), ")")
+
 	// part 2
+	fmt.Println("Part 2, most scenic tree: ", mostScenicTree(f))
 
 }
 
-type forest [][]int
+func mostScenicTree(f forest) int {
+	var max int
+	for i, row := range f {
+		for j := range row {
+			if f.scenicValueAt(i, j) > max {
+				max = f[i][j].height
+			}
+		}
+	}
+	return max
+}
 
+type tree struct {
+	height      int
+	scenicValue int
+	scenicLeft  int
+	scenicRight int
+	scenicUp    int
+	scenicDown  int
+}
+type forest [][]tree
+
+func (f forest) scenicValueAt(i, j int) int {
+	return 1
+}
 func (f forest) numVisible() int {
 	var num int
 	for i, row := range f {
 		for j := range row {
 			if f.isVisible(i, j) {
 				num++
-			} else {
-				fmt.Printf("[%d,%d]\n", i, j)
 			}
 		}
 	}
@@ -51,7 +74,7 @@ func (f forest) isVisible(i, j int) bool {
 }
 func (f forest) isVisibleLeft(i, j int) bool {
 	for k := j - 1; k >= 0; k-- {
-		if f[i][k] >= f[i][j] {
+		if f[i][k].height >= f[i][j].height {
 			return false
 		}
 
@@ -60,7 +83,7 @@ func (f forest) isVisibleLeft(i, j int) bool {
 }
 func (f forest) isVisibleRight(i, j int) bool {
 	for k := j + 1; k < len(f[i]); k++ {
-		if f[i][k] >= f[i][j] {
+		if f[i][k].height >= f[i][j].height {
 			return false
 		}
 	}
@@ -68,7 +91,7 @@ func (f forest) isVisibleRight(i, j int) bool {
 }
 func (f forest) isVisibleUp(i, j int) bool {
 	for k := i - 1; k >= 0; k-- {
-		if f[k][j] >= f[i][j] {
+		if f[k][j].height >= f[i][j].height {
 			return false
 		}
 	}
@@ -76,7 +99,7 @@ func (f forest) isVisibleUp(i, j int) bool {
 }
 func (f forest) isVisibleDown(i, j int) bool {
 	for k := i + 1; k < len(f); k++ {
-		if f[k][j] >= f[i][j] {
+		if f[k][j].height >= f[i][j].height {
 			return false
 		}
 	}
@@ -87,7 +110,7 @@ func (f forest) String() string {
 	var s string
 	for i, row := range f {
 		for _, col := range row {
-			s += fmt.Sprintf("%d", col)
+			s += fmt.Sprintf("%d", col.height)
 		}
 		if i < len(f)-1 {
 			s += "\r\n"
@@ -99,13 +122,13 @@ func (f forest) String() string {
 func (f forest) fromString(s string) forest {
 	str := strings.Split(s, "\r\n")
 	for i, row := range str {
-		f = append(f, []int{})
+		f = append(f, []tree{})
 		for _, col := range row {
 			height, err := strconv.Atoi(string(col))
 			if err != nil {
 				panic(err)
 			}
-			f[i] = append(f[i], height)
+			f[i] = append(f[i], tree{height: height})
 		}
 		s += "\n"
 	}
