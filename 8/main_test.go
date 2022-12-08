@@ -190,3 +190,95 @@ func Test_forest_isVisibleDown(t *testing.T) {
 		})
 	}
 }
+
+func Test_forest_scenicValueAt(t *testing.T) {
+	type args struct {
+		i int
+		j int
+	}
+	tests := []struct {
+		name string
+		f    forest
+		args args
+		want int
+	}{
+		{"0,0", sampleForest(), args{0, 0}, 0},
+		{"0,1", sampleForest(), args{0, 1}, 0},
+		{"0,2", sampleForest(), args{0, 2}, 0},
+		{"0,3", sampleForest(), args{0, 3}, 0},
+		{"0,4", sampleForest(), args{0, 4}, 0},
+		{"1,0", sampleForest(), args{1, 0}, 0},
+		{"1,1", sampleForest(), args{1, 1}, 1},
+		{"1,2", sampleForest(), args{1, 2}, 4},
+		{"1,3", sampleForest(), args{1, 3}, 1},
+		{"1,4", sampleForest(), args{1, 4}, 0},
+		{"2,0", sampleForest(), args{2, 0}, 0},
+		{"2,1", sampleForest(), args{2, 1}, 6},
+		{"2,2", sampleForest(), args{2, 2}, 1},
+		{"2,3", sampleForest(), args{2, 3}, 2},
+		{"2,4", sampleForest(), args{2, 4}, 0},
+		{"3,0", sampleForest(), args{3, 0}, 0},
+		{"3,1", sampleForest(), args{3, 1}, 1},
+		{"3,2", sampleForest(), args{3, 2}, 8},
+		{"3,3", sampleForest(), args{3, 3}, 3},
+		{"3,4", sampleForest(), args{3, 4}, 0},
+		{"4,0", sampleForest(), args{4, 0}, 0},
+		{"4,1", sampleForest(), args{4, 1}, 0},
+		{"4,2", sampleForest(), args{4, 2}, 0},
+		{"4,3", sampleForest(), args{4, 3}, 0},
+		{"4,4", sampleForest(), args{4, 4}, 0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.f.scenicValueAt(tt.args.i, tt.args.j); got != tt.want {
+				t.Errorf("forest.scenicValueAt() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_forest_scenicLeft(t *testing.T) {
+	type args struct {
+		i int
+		j int
+	}
+	tests := []struct {
+		name string
+		f    forest
+		args args
+		want int
+	}{
+		{"0,0", sampleForest(), args{0, 0}, 0},
+		{"0,1", sampleForest(), args{0, 1}, 1},
+		{"0,2", sampleForest(), args{0, 2}, 2},
+		{"0,3", sampleForest(), args{0, 3}, 3},
+		{"0,4", sampleForest(), args{0, 4}, 1},
+		{"1,0", sampleForest(), args{1, 0}, 0},
+		{"1,1", sampleForest(), args{1, 1}, 1},
+		{"1,2", sampleForest(), args{1, 2}, 1},
+		{"1,3", sampleForest(), args{1, 3}, 1},
+		{"1,4", sampleForest(), args{1, 4}, 2},
+		{"2,0", sampleForest(), args{2, 0}, 0},
+		{"2,1", sampleForest(), args{2, 1}, 1},
+		{"2,2", sampleForest(), args{2, 2}, 1},
+		{"2,3", sampleForest(), args{2, 3}, 1},
+		{"2,4", sampleForest(), args{2, 4}, 1},
+		{"3,0", sampleForest(), args{3, 0}, 0},
+		{"3,1", sampleForest(), args{3, 1}, 1},
+		{"3,2", sampleForest(), args{3, 2}, 2},
+		{"3,3", sampleForest(), args{3, 3}, 1},
+		{"3,4", sampleForest(), args{3, 4}, 4},
+		{"4,0", sampleForest(), args{4, 0}, 0},
+		{"4,1", sampleForest(), args{4, 1}, 1},
+		{"4,2", sampleForest(), args{4, 2}, 1},
+		{"4,3", sampleForest(), args{4, 3}, 3},
+		{"4,4", sampleForest(), args{4, 4}, 1},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.f.scenicLeft(tt.args.i, tt.args.j); got != tt.want {
+				t.Errorf("forest.scenicLeft() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

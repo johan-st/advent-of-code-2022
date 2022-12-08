@@ -22,30 +22,78 @@ func main() {
 }
 
 func mostScenicTree(f forest) int {
-	var max int
+	mostScenicTree := [2]int{0, 0}
 	for i, row := range f {
 		for j := range row {
-			if f.scenicValueAt(i, j) > max {
-				max = f[i][j].height
+			if f.scenicValueAt(i, j) > f.scenicValueAt(mostScenicTree[0], mostScenicTree[1]) {
+				mostScenicTree = [2]int{i, j}
 			}
 		}
 	}
-	return max
+	return f.scenicValueAt(mostScenicTree[0], mostScenicTree[1])
 }
 
 type tree struct {
 	height      int
 	scenicValue int
-	scenicLeft  int
-	scenicRight int
-	scenicUp    int
-	scenicDown  int
 }
 type forest [][]tree
 
 func (f forest) scenicValueAt(i, j int) int {
-	return 1
+	if f[i][j].scenicValue > 0 {
+		return f[i][j].scenicValue
+	}
+	f[i][j].scenicValue = f.scenicLeft(i, j) * f.scenicRight(i, j) * f.scenicUp(i, j) * f.scenicDown(i, j)
+
+	return f[i][j].scenicValue
 }
+
+func (f forest) scenicLeft(i, j int) int {
+	var num int
+	for k := j - 1; k >= 0; k-- {
+		if f[i][k].height >= f[i][j].height {
+			num++
+			return num
+		}
+		num++
+	}
+	return num
+}
+func (f forest) scenicRight(i, j int) int {
+	var num int
+	for k := j + 1; k < len(f[i]); k++ {
+		if f[i][k].height >= f[i][j].height {
+			num++
+			return num
+		}
+		num++
+	}
+	return num
+}
+
+func (f forest) scenicUp(i, j int) int {
+	var num int
+	for k := i - 1; k >= 0; k-- {
+		if f[k][j].height >= f[i][j].height {
+			num++
+			return num
+		}
+		num++
+	}
+	return num
+}
+func (f forest) scenicDown(i, j int) int {
+	var num int
+	for k := i + 1; k < len(f); k++ {
+		if f[k][j].height >= f[i][j].height {
+			num++
+			return num
+		}
+		num++
+	}
+	return num
+}
+
 func (f forest) numVisible() int {
 	var num int
 	for i, row := range f {
