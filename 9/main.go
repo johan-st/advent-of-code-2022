@@ -13,7 +13,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	sim := newSimulation(1000, 2)
+	sim := newSimulation(5000, 10)
 
 	sim.applyMoves(moves)
 	if err != nil {
@@ -32,17 +32,26 @@ func newSimulation(sizeArea int, lengthRope int) ropeSimulation {
 			area[i] = append(area[i], position{})
 		}
 	}
-	sim := ropeSimulation{area: area, rope: &rope{point{sizeArea / 2, sizeArea / 2}, point{sizeArea / 2, sizeArea / 2}}}
+	startPos := point{sizeArea / 2, sizeArea / 2}
+	r := newRope(startPos, lengthRope)
+	sim := ropeSimulation{area: area, rope: r}
 	sim.markTailVisit()
 	return sim
+}
+
+func newRope(p point, len int) *rope {
+	r := rope{}
+	for i := 0; i < len; i++ {
+		r = append(r, p)
+	}
+	return &r
 }
 
 type point struct {
 	x, y int
 }
-type rope struct {
-	head, tail point
-}
+type rope []point
+
 type position struct {
 	visited bool
 }
@@ -59,7 +68,8 @@ type ropeSimulation struct {
 }
 
 func (sim ropeSimulation) markTailVisit() {
-	sim.area[sim.rope.tail.x][sim.rope.tail.y].visited = true
+	r := sim.rope
+	sim.area[(*r)[len(*r)-1].x][(*r)[len(*r)-1].y].visited = true
 }
 func (s ropeSimulation) applyMoves(ms moves) error {
 	for i, m := range ms {
@@ -96,29 +106,42 @@ func (s ropeSimulation) applyMove(m move) error {
 }
 
 func (s ropeSimulation) moveUp() {
-	s.rope.head.y++
+	r := s.rope
+	(*r)[0].y++
 	s.rope.dragTail()
 	s.markTailVisit()
 }
 
 func (s ropeSimulation) moveDown() {
-	s.rope.head.y--
+	r := s.rope
+	(*r)[0].y--
 	s.rope.dragTail()
 	s.markTailVisit()
 }
 func (s ropeSimulation) moveLeft() {
-	s.rope.head.x--
+	r := s.rope
+	(*r)[0].x--
 	s.rope.dragTail()
 	s.markTailVisit()
 }
 func (s ropeSimulation) moveRight() {
-	s.rope.head.x++
+	r := s.rope
+	(*r)[0].x++
 	s.rope.dragTail()
 	s.markTailVisit()
 }
 func (r *rope) dragTail() {
-	dX := r.head.x - r.tail.x
-	dY := r.head.y - r.tail.y
+	if len(*r) < 2 {
+		return
+	}
+	for i := 1; i < len(*r); i++ {
+		updateRopePoint((*r)[i-1], &(*r)[i])
+	}
+}
+
+func updateRopePoint(head point, tail *point) {
+	dX := head.x - (*tail).x
+	dY := head.y - (*tail).y
 	if dX <= 1 && dX >= -1 && dY <= 1 && dY >= -1 {
 		// tail need nor move sonce it is whithin one step of the head
 		return
@@ -126,38 +149,37 @@ func (r *rope) dragTail() {
 	if dX == 0 {
 		// tail is in same row as head
 		if dY < 1 {
-			(*r).tail.y--
+			(*tail).y--
 		} else {
-			(*r).tail.y++
+			(*tail).y++
 		}
 	}
 	if dY == 0 {
 		// tail is in same collumn as head
 		if dX < 1 {
-			(*r).tail.x--
+			(*tail).x--
 		} else {
-			(*r).tail.x++
+			(*tail).x++
 		}
 
 	}
 	if dX != 0 && dY != 0 {
 		// tail is not in the same column or row as the head and are to make a diaonal move to catch up.
 		if dX > 0 && dY > 0 {
-			(*r).tail.x++
-			(*r).tail.y++
+			(*tail).x++
+			(*tail).y++
 		} else if dX > 0 && dY < 0 {
-			(*r).tail.x++
-			(*r).tail.y--
+			(*tail).x++
+			(*tail).y--
 		} else if dX < 0 && dY > 0 {
-			(*r).tail.x--
-			(*r).tail.y++
+			(*tail).x--
+			(*tail).y++
 		} else {
-			(*r).tail.x--
-			(*r).tail.y--
+			(*tail).x--
+			(*tail).y--
 		}
 	}
 }
-
 func (s ropeSimulation) numVisited() int {
 	sum := 0
 	for _, row := range s.area {

@@ -52,7 +52,7 @@ func Test_rope_dragTail(t *testing.T) {
 }
 
 func Test_ropeSimulation_moveCase(t *testing.T) {
-	sim := newSimulation(10)
+	sim := newSimulation(10, 2)
 	ok := testSim(sim, &rope{point{5, 5}, point{5, 5}}, 1)
 	if !ok {
 		t.FailNow()
