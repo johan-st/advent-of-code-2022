@@ -2,20 +2,21 @@ package main
 
 import (
 	"fmt"
-
+	"sort"
 	// u "github.com/johan-st/advent-of-code-2022/util"
-	u "github.com/johan-st/advent-of-code-2022/util"
 )
 
 func main() {
 	fmt.Println("MONKEY BUSSINES v.1")
-	state := stateFromString(u.Load("sample.txt"))
+	state := initialState()
 	steps := 20
-	fmt.Println(0, state)
 	for i := 0; i < steps; i++ {
 		runRound(state)
-		fmt.Println(i+1, state)
 	}
+	sort.Sort(state)
+	fmt.Println(state)
+	monkeyBusiness := (*state)[len(*state)-1].numInspections * (*state)[len(*state)-2].numInspections
+	fmt.Println("Monkey Business:", monkeyBusiness)
 }
 
 type monkey struct {
@@ -24,6 +25,7 @@ type monkey struct {
 	test            func(int) bool
 	monkeyWhenTrue  int
 	monkeyWhenFalse int
+	numInspections  int
 }
 
 func runRoundMonkey(s *state, monkeyIndex int) {
@@ -36,6 +38,7 @@ func runRoundMonkey(s *state, monkeyIndex int) {
 func inspectAndAct(s *state, monkeyIndex int) {
 	// fmt.Println(m.items)
 	m := &(*s)[monkeyIndex]
+	m.numInspections++
 	m.items[0] = (m.operation(m.items[0])) / 3
 	// fmt.Println(m.items)
 
@@ -49,9 +52,13 @@ func inspectAndAct(s *state, monkeyIndex int) {
 
 type state []monkey
 
-func stateFromString(str string) *state {
-	// TODO: read from file
-	state := sample()
+func (a state) Len() int           { return len(a) }
+func (a state) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a state) Less(i, j int) bool { return a[i].numInspections < a[j].numInspections }
+
+func initialState() *state {
+	// state := sample()
+	state := input()
 	return &state
 }
 
@@ -65,7 +72,7 @@ func throw(s *state, from int, to int) {
 func (s state) String() string {
 	str := fmt.Sprintf("%d monkeys in state", len(s))
 	for i, monkey := range s {
-		str += fmt.Sprintf("\nMonkey %d: %v", i, monkey.items)
+		str += fmt.Sprintf("\nMonkey %d (inspections %d): %v", i, monkey.numInspections, monkey.items)
 	}
 	return str
 }
@@ -78,17 +85,29 @@ func runRound(s *state) {
 
 // SAMPLE MONKEY
 func sample() state {
-	m1 := monkey{items: []int{79, 98}, operation: multiply(19), test: divisible(23), monkeyWhenTrue: 2, monkeyWhenFalse: 3}
-	m2 := monkey{items: []int{54, 65, 75, 74}, operation: add(6), test: divisible(19), monkeyWhenTrue: 2, monkeyWhenFalse: 0}
-	m3 := monkey{items: []int{79, 60, 97}, operation: square, test: divisible(13), monkeyWhenTrue: 1, monkeyWhenFalse: 3}
-	m4 := monkey{items: []int{74}, operation: add(3), test: divisible(17), monkeyWhenTrue: 0, monkeyWhenFalse: 1}
+	m1 := monkey{items: []int{79, 98}, operation: mul(19), test: div(23), monkeyWhenTrue: 2, monkeyWhenFalse: 3}
+	m2 := monkey{items: []int{54, 65, 75, 74}, operation: add(6), test: div(19), monkeyWhenTrue: 2, monkeyWhenFalse: 0}
+	m3 := monkey{items: []int{79, 60, 97}, operation: square, test: div(13), monkeyWhenTrue: 1, monkeyWhenFalse: 3}
+	m4 := monkey{items: []int{74}, operation: add(3), test: div(17), monkeyWhenTrue: 0, monkeyWhenFalse: 1}
 
 	return state{m1, m2, m3, m4}
+}
+func input() state {
+	return state{
+		monkey{[]int{75, 63}, mul(3), div(11), 7, 2, 0},
+		monkey{[]int{65, 79, 98, 77, 56, 54, 83, 94}, add(3), div(2), 2, 0, 0},
+		monkey{[]int{66}, add(5), div(5), 7, 5, 0},
+		monkey{[]int{51, 89, 90}, mul(19), div(7), 6, 4, 0},
+		monkey{[]int{75, 94, 66, 90, 77, 82, 61}, add(1), div(17), 6, 1, 0},
+		monkey{[]int{53, 76, 59, 92, 95}, add(2), div(19), 4, 3, 0},
+		monkey{[]int{81, 61, 75, 89, 70, 92}, square, div(3), 0, 1, 0},
+		monkey{[]int{81, 86, 62, 87}, add(8), div(13), 3, 5, 0},
+	}
 }
 
 // helpers
 
-func multiply(a int) func(int) int {
+func mul(a int) func(int) int {
 	return func(b int) int { return a * b }
 }
 
@@ -96,7 +115,7 @@ func add(a int) func(int) int {
 	return func(b int) int { return a + b }
 }
 
-func divisible(div int) func(int) bool {
+func div(div int) func(int) bool {
 	return func(a int) bool { return a%div == 0 }
 }
 
