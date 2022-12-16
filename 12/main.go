@@ -74,3 +74,7 @@ func (m heightMap) String() string {
 type pos struct {
 	row, col int
 }
+
+func (p pos) String() string {
+	return fmt.Sprintf("[%d,%d]", p.row, p.col)
+}
