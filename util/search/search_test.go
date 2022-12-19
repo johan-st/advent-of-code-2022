@@ -25,19 +25,43 @@ func Test_Graph_AddNodes(t *testing.T) {
 
 func Test_Graph_AddEdges(t *testing.T) {
 	g := s.Graph{}
-	g.AddNodes([]int{1, 2, 3, 4, 5, 6, 99})
+	err := g.AddNodes([]int{1, 2, 3, 4, 5, 6, 99})
+	if err != nil {
+		t.Errorf("error while adding nodes. error: %s", err)
+	}
 	es := []s.Edge{
 		{1, 2}, {1, 3}, {1, 4},
 		{4, 99}, {4, 5}, {4, 6},
 		{99, 1}, {99, 2}, {99, 3},
 	}
-	g.AddEdges(es)
+	err = g.AddEdges(es)
+	if err != nil {
+		t.Errorf("error while adding edges. error: %s", err)
+	}
 	for _, e := range es {
 		if !checkEdge(g, e) {
 			fmt.Printf("check on edges failed on edge%v\n", e)
 			t.Fail()
 		}
 	}
+
+	// error cases
+	// adding edges connected to no node
+	g = s.Graph{}
+	err = g.AddNodes([]int{1, 2, 3, 4, 5, 6})
+	if err != nil {
+		t.Errorf("error while adding nodes. error: %s\n", err)
+	}
+	es = []s.Edge{
+		{1, 2}, {1, 3}, {1, 4},
+		{4, 99}, {4, 5}, {4, 6},
+		{99, 1}, {99, 2}, {99, 3},
+	}
+	err = g.AddEdges(es)
+	if err == nil {
+		t.Errorf("expected error when adding edges which do not connect to known node")
+	}
+
 }
 
 func Test_Graph_AddEdges_directional(t *testing.T) {
@@ -89,6 +113,15 @@ func Test_Graph_BredthFirst(t *testing.T) {
 	want = []int{2, 3, 4, 1}
 	if !reflect.DeepEqual(path, want) {
 		t.Errorf("wanted: %v\ngot: %v\n", want, path)
+	}
+	// no solution
+	g = s.Graph{}
+	g.AddNodes([]int{1, 2, 3})
+	g.AddEdges_directional([]s.Edge{{1, 2}, {2, 3}})
+	path = g.BredthFirst(2, 1)
+	want = []int{} // Expect empty path when no solution is available
+	if !reflect.DeepEqual(path, want) {
+		t.Errorf("expect empty path when no path is found\nwanted: %v\ngot: %v\n", want, path)
 	}
 }
 

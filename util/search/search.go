@@ -126,6 +126,9 @@ func (g Graph) BredthFirst(start int, end int) []int {
 	}
 
 	path := []int{end}
+	if g[end].predecessor == 0 {
+		return []int{}
+	}
 	last := end
 	done := false
 	for !done {
@@ -136,8 +139,7 @@ func (g Graph) BredthFirst(start int, end int) []int {
 			done = true
 		}
 		if id < 1 {
-			fmt.Printf("something went very wrong here %d", id)
-			break
+			panic("\n\nsomething went very wrong here. This might be related to predecessors or an unsolvable path\n")
 		}
 	}
 	path = reverse(path)
