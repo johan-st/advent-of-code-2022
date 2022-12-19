@@ -103,7 +103,12 @@ func (g Graph) AddEdges_directional(es []Edge) error {
 	return nil
 }
 
+// IMPORTANT! This action should only be run once per graph. There is an issue that can cause infinit loops otherwise.
 func (g Graph) BredthFirst(start int, end int) []int {
+
+	// TODO: there is an issue where several searches on the same graph causes a loop.
+	// consider finding a solution
+
 	q := que{}
 	q.enque(g[start])
 	for !q.empty() {
@@ -111,7 +116,6 @@ func (g Graph) BredthFirst(start int, end int) []int {
 		for _, n := range current.neighbours {
 			next := g[n]
 			if n == end {
-				// TODO:
 				node := g[n]
 				node.predecessor = current.id
 				g[n] = node
