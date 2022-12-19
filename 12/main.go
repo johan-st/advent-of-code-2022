@@ -20,6 +20,32 @@ func main() {
 	} else {
 		fmt.Println("shortest path is", len(shortestPath)-1, "steps")
 	}
+
+	shortestHike := len(shortestPath)
+	allLowest := lowestPositions(heightMap)
+	for i, id := range allLowest {
+		fmt.Printf("\rCalculating (id %d) %d of %d. currently shortest is %d", id, i, len(allLowest), shortestHike-1)
+		graph, _, end := graphFromMap(heightMap)
+		short := graph.BredthFirst(id, end)
+		if len(short) < shortestHike && len(short) > 1 {
+			shortestHike = len(short)
+		}
+	}
+	fmt.Println("\nshortest hike is ", shortestHike-1, "steps")
+}
+
+func lowestPositions(m heightMap) []int {
+	low := []int{}
+	for i, row := range *m.nodes {
+		for j, node := range row {
+			if node.height == 0 {
+				id := i*len(row) + j + 1
+				low = append(low, id)
+			}
+
+		}
+	}
+	return low
 }
 func graphFromMap(m heightMap) (s.Graph, int, int) {
 	g := s.Graph{}
