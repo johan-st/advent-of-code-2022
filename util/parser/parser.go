@@ -47,42 +47,46 @@ func Rune(r rune) Parser {
 // COMBINATORS
 
 // parse 0 or more
-func Some(p Parser, s string) Result {
-	// first itteration
-	parsed := p(s)
-	retResult := parsed.Parsed
-	s = parsed.Remainder
-
-	// remaining itterations
-	for parsed.Parsed != "" {
-		parsed = p(s)
-		if len(parsed.Parsed) < 1 {
-			continue
-		}
-		retResult += parsed.Parsed
+func Some(p Parser) Parser {
+	return func(s string) Result {
+		// first itteration
+		parsed := p(s)
+		retResult := parsed.Parsed
 		s = parsed.Remainder
+
+		// remaining itterations
+		for parsed.Parsed != "" {
+			parsed = p(s)
+			if len(parsed.Parsed) < 1 {
+				continue
+			}
+			retResult += parsed.Parsed
+			s = parsed.Remainder
+		}
+		return Result{retResult, s}
 	}
-	return Result{retResult, s}
 }
 
-func OneOf(p1 Parser, p2 Parser, s string) Result {
-	if len(s) < 1 {
-		return Result{}
+func OneOf(p1 Parser, p2 Parser) Parser {
+	return func(s string) Result {
+		if len(s) < 1 {
+			return Result{}
+		}
+		fmt.Println("string is", s)
+		if res := p1(s); len(res.Parsed) > 0 {
+			fmt.Println("FIRST\n", res)
+			return res
+		}
+		if res := p2(s); len(res.Parsed) > 0 {
+			fmt.Println("SECOND\n", res)
+			return res
+		}
+		return Result{"", s}
 	}
-	fmt.Println("string is", s)
-	if res := p1(s); len(res.Parsed) > 0 {
-		fmt.Println("FIRST\n", res)
-		return res
-	}
-	if res := p2(s); len(res.Parsed) > 0 {
-		fmt.Println("SECOND\n", res)
-		return res
-	}
-	return Result{"", s}
+}
+
+func All(ps []Parser) Parser {
+	return ps[0]
 }
 
 // HELPERS
-
-// func do(fs []Parser,) any {
-
-// }
