@@ -44,9 +44,17 @@ func Rune(r rune) Parser {
 	}
 }
 
+// Parse an integer
+func Int() Parser {
+	return Pipe([]Parser{
+		Rune('-'),
+		Some(Digit()),
+	})
+}
+
 // COMBINATORS
 
-// parse 0 or more
+// parse zero or more
 func Some(p Parser) Parser {
 	return func(s string) Result {
 		// first itteration

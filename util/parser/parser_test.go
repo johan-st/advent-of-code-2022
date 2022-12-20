@@ -71,6 +71,31 @@ func TestRune(t *testing.T) {
 	}
 }
 
+func TestInt(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name string
+		args args
+		want p.Result
+	}{
+		{"empty string", args{""}, p.Result{"", ""}},
+		{"non-int", args{"one"}, p.Result{"", "one"}},
+		{"lone zero", args{"0"}, p.Result{"0", ""}},
+		{"single digit int", args{"5"}, p.Result{"5", ""}},
+		{"negative int", args{"-5"}, p.Result{"-5", ""}},
+		{"multiple digit int", args{"42"}, p.Result{"42", ""}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := p.Int()(tt.args.s); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Int() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 // COMBINATORS
 
 func TestSome(t *testing.T) {
