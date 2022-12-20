@@ -1,8 +1,6 @@
 // Rudimentary Parser Combinator package
 package parser
 
-import "fmt"
-
 /*
 A Parser for things,
 Is a function from string,
@@ -81,13 +79,10 @@ func OneOf(p1 Parser, p2 Parser) Parser {
 		if len(s) < 1 {
 			return Result{}
 		}
-		fmt.Println("string is", s)
 		if res := p1(s); len(res.Parsed) > 0 {
-			fmt.Println("FIRST\n", res)
 			return res
 		}
 		if res := p2(s); len(res.Parsed) > 0 {
-			fmt.Println("SECOND\n", res)
 			return res
 		}
 		return Result{"", s}
