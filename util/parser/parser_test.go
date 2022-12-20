@@ -124,3 +124,28 @@ func TestOneOf(t *testing.T) {
 		})
 	}
 }
+
+func TestPipe(t *testing.T) {
+	type args struct {
+		ps []p.Parser
+		s  string
+	}
+	tests := []struct {
+		name string
+		args args
+		want p.Result
+	}{
+		{"empty string", args{[]p.Parser{p.Digit(), p.Rune('a')}, ""}, p.Result{}},
+		{"no hit", args{[]p.Parser{p.Digit(), p.Rune('a')}, "bc"}, p.Result{"", "bc"}},
+		{"first hit", args{[]p.Parser{p.Digit(), p.Rune('a')}, "1b"}, p.Result{"1", "b"}},
+		{"second hit", args{[]p.Parser{p.Digit(), p.Rune('a')}, "a1"}, p.Result{"a", "1"}},
+		{"both hit", args{[]p.Parser{p.Digit(), p.Rune('a'), p.Rune('b'), p.Rune('c')}, "1abc"}, p.Result{"1abc", ""}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := p.Pipe(tt.args.ps)(tt.args.s); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Pipe() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

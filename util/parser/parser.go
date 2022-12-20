@@ -67,6 +67,7 @@ func Some(p Parser) Parser {
 	}
 }
 
+// match either the first or the second parser
 func OneOf(p1 Parser, p2 Parser) Parser {
 	return func(s string) Result {
 		if len(s) < 1 {
@@ -85,8 +86,16 @@ func OneOf(p1 Parser, p2 Parser) Parser {
 	}
 }
 
-func All(ps []Parser) Parser {
-	return ps[0]
+// Run the string through all parsers in order
+func Pipe(ps []Parser) Parser {
+	return func(s string) Result {
+		res := Result{"", s}
+		for _, p := range ps {
+			r := p(res.Remainder)
+			res = Result{res.Parsed + r.Parsed, r.Remainder}
+		}
+		return res
+	}
 }
 
 // HELPERS
