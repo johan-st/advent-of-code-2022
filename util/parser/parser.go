@@ -1,49 +1,88 @@
 // Rudimentary Parser Combinator package
 package parser
 
+import "fmt"
+
 /*
-A parser for things,
+A Parser for things,
 Is a function from string,
 To lists of pairs,
 Of things and strings.
 */
-type parser func(string) []result
+type Parser func(string) Result
 
-type result struct {
-	result    string
-	remainder string
+type Result struct {
+	Parsed    string
+	Remainder string
+}
+
+// PARSERS
+
+// parse a single digit
+func Digit() Parser {
+	return func(s string) Result {
+		if len(s) < 1 {
+			return Result{"", s}
+		}
+		if s[0] >= '0' && s[0] <= '9' {
+			return Result{string(s[0]), s[1:]}
+		}
+		return Result{"", s}
+	}
 }
 
 // parse a single digit
-func ParseDigit(s string) []result {
-	if len(s) < 1 {
-		return []result{}
+func Rune(r rune) Parser {
+	return func(s string) Result {
+		if len(s) < 1 {
+			return Result{"", s}
+		}
+		if rune(s[0]) == r {
+			return Result{string(s[0]), s[1:]}
+		}
+		return Result{"", s}
 	}
-	if s[0] >= '0' && s[0] <= '9' {
-		return []result{{string(s[0]), s[1:]}}
-	}
-	return []result{{"", s}}
 }
+
+// COMBINATORS
 
 // parse 0 or more
-func Some(p parser, s string) []result {
+func Some(p Parser, s string) Result {
 	// first itteration
 	parsed := p(s)
-	if len(parsed) < 1 {
-		return parsed
-	}
-	retResult := parsed[0].result
-	s = parsed[0].remainder
+	retResult := parsed.Parsed
+	s = parsed.Remainder
 
 	// remaining itterations
-	for len(parsed) > 0 && parsed[0].result != "" {
+	for parsed.Parsed != "" {
 		parsed = p(s)
-		if len(parsed) < 1 {
+		if len(parsed.Parsed) < 1 {
 			continue
 		}
-		retResult += parsed[0].result
-		s = parsed[0].remainder
+		retResult += parsed.Parsed
+		s = parsed.Remainder
 	}
-
-	return []result{{retResult, s}}
+	return Result{retResult, s}
 }
+
+func OneOf(p1 Parser, p2 Parser, s string) Result {
+	if len(s) < 1 {
+		return Result{}
+	}
+	fmt.Println("string is", s)
+	if res := p1(s); len(res.Parsed) > 0 {
+		fmt.Println("FIRST\n", res)
+		return res
+	}
+	if res := p2(s); len(res.Parsed) > 0 {
+		fmt.Println("SECOND\n", res)
+		return res
+	}
+	return Result{"", s}
+}
+
+// HELPERS
+
+// func do(fs []Parser,) any {
+
+// }
