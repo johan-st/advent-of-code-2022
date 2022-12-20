@@ -139,7 +139,8 @@ func TestPipe(t *testing.T) {
 		{"no hit", args{[]p.Parser{p.Digit(), p.Rune('a')}, "bc"}, p.Result{"", "bc"}},
 		{"first hit", args{[]p.Parser{p.Digit(), p.Rune('a')}, "1b"}, p.Result{"1", "b"}},
 		{"second hit", args{[]p.Parser{p.Digit(), p.Rune('a')}, "a1"}, p.Result{"a", "1"}},
-		{"both hit", args{[]p.Parser{p.Digit(), p.Rune('a'), p.Rune('b'), p.Rune('c')}, "1abc"}, p.Result{"1abc", ""}},
+		{"all hit", args{[]p.Parser{p.Digit(), p.Rune('a'), p.Rune('b'), p.Rune('c')}, "1abc"}, p.Result{"1abc", ""}},
+		{"all hit except one in the middle", args{[]p.Parser{p.Digit(), p.Rune('a'), p.Rune('b'), p.Rune('c')}, "1bc"}, p.Result{"1bc", ""}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
