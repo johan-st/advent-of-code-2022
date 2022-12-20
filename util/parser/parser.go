@@ -31,7 +31,7 @@ func Digit() Parser {
 	}
 }
 
-// parse a single digit
+// parse a single rune
 func Rune(r rune) Parser {
 	return func(s string) Result {
 		if len(s) < 1 {
@@ -97,5 +97,3 @@ func Pipe(ps []Parser) Parser {
 		return res
 	}
 }
-
-// HELPERS
