@@ -9,38 +9,100 @@ import (
 
 // PARSERS
 
+// DEBUG CODE GOES HERE
+// TODO: REMOVE BEFORE COMMIT
+
+// DEBUG END
+
 func TestDigit(t *testing.T) {
 	type args struct {
 		s string
 	}
 	tests := []struct {
-		name string
-		args args
-		want p.Result
+		name    string
+		args    args
+		want    p.Result
+		wantErr bool
 	}{
-		{"empty string", args{""}, p.Result{"", ""}},
-		{"multiple digits", args{"123456"}, p.Result{"1", "23456"}},
-		{"non digit", args{"a0"}, p.Result{"", "a0"}},
-		{"digit then non digit", args{"0a"}, p.Result{"0", "a"}},
+		{"empty string", args{""}, p.Result{}, true},
+		{"rune before 0", args{"/"}, p.Result{}, true},
+		{"0", args{"0"}, []any{"0"}, false},
+		{"1", args{"1"}, p.Result{"1"}, false},
+		{"2", args{"2"}, p.Result{"2"}, false},
+		{"3", args{"3"}, p.Result{"3"}, false},
+		{"4", args{"4"}, p.Result{"4"}, false},
+		{"5", args{"5"}, p.Result{"5"}, false},
+		{"6", args{"6"}, p.Result{"6"}, false},
+		{"7", args{"7"}, p.Result{"7"}, false},
+		{"8", args{"8"}, p.Result{"8"}, false},
+		{"9", args{"9"}, p.Result{"9"}, false},
+		{"rune after 9", args{":"}, p.Result{}, true},
+	}
 
-		// exhaustive tests of valid runes (and "one-off"-errors)
-		{"rune < digits", args{string(rune('0' - 1))}, p.Result{"", "/"}},
-		{"single digit", args{"0"}, p.Result{"0", ""}},
-		{"single digit", args{"1"}, p.Result{"1", ""}},
-		{"single digit", args{"2"}, p.Result{"2", ""}},
-		{"single digit", args{"3"}, p.Result{"3", ""}},
-		{"single digit", args{"4"}, p.Result{"4", ""}},
-		{"single digit", args{"5"}, p.Result{"5", ""}},
-		{"single digit", args{"6"}, p.Result{"6", ""}},
-		{"single digit", args{"7"}, p.Result{"7", ""}},
-		{"single digit", args{"8"}, p.Result{"8", ""}},
-		{"single digit", args{"9"}, p.Result{"9", ""}},
-		{"rune > digits", args{string(rune('9' + 1))}, p.Result{"", ":"}},
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := p.Parse(p.Digit(), tt.args.s)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Digit() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Digit() = %#v, want %#v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDigits(t *testing.T) {
+	type args struct {
+		p p.Parser
+		s string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    p.Result
+		wantErr bool
+	}{
+		{"empty string", args{p.Digits(), ""}, p.Result{}, true},
+		{"match", args{p.Digits(), "12a"}, p.Result{"1", "2"}, false},
+		{"miss", args{p.Digits(), "b12"}, p.Result{}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := p.Digit()(tt.args.s); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ParseDigit() = %v, want %v", got, tt.want)
+			got, err := p.Parse(tt.args.p, tt.args.s)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Digits() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Digits() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestSome(t *testing.T) {
+	type args struct {
+		p p.Parser
+		s string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    p.Result
+		wantErr bool
+	}{
+		{"empty string", args{p.Digit(), ""}, p.Result{}, false},
+		{"single digit", args{p.Digit(), "1"}, p.Result{"1"}, false},
+		{"multiple digits", args{p.Digit(), "123"}, p.Result{"1", "2", "3"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := p.Parse(p.Some(tt.args.p), tt.args.s)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Some() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Some() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -48,23 +110,26 @@ func TestDigit(t *testing.T) {
 
 func TestRune(t *testing.T) {
 	type args struct {
-		r rune
+		p p.Parser
 		s string
 	}
 	tests := []struct {
-		name string
-		args args
-		want p.Result
+		name    string
+		args    args
+		want    p.Result
+		wantErr bool
 	}{
-		{"empty string", args{'5', ""}, p.Result{"", ""}},
-		{"single hit", args{'a', "a"}, p.Result{"a", ""}},
-		{"multiple hits", args{'a', "abc"}, p.Result{"a", "bc"}},
-		{"single miss", args{'.', "abc"}, p.Result{"", "abc"}},
-		{"single hit then miss", args{'.', ".abc"}, p.Result{".", "abc"}},
+		{"empty string", args{p.Rune('a'), ""}, p.Result{}, true},
+		{"match", args{p.Rune('a'), "ab"}, p.Result{"a"}, false},
+		{"miss", args{p.Rune('a'), "ba"}, p.Result{}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := p.Rune(tt.args.r)(tt.args.s); !reflect.DeepEqual(got, tt.want) {
+			got, err := p.Parse(tt.args.p, tt.args.s)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Rune() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Rune() = %v, want %v", got, tt.want)
 			}
 		})
@@ -73,52 +138,29 @@ func TestRune(t *testing.T) {
 
 func TestInt(t *testing.T) {
 	type args struct {
-		s string
-	}
-	tests := []struct {
-		name string
-		args args
-		want p.Result
-	}{
-		{"empty string", args{""}, p.Result{"", ""}},
-		{"non-int", args{"one"}, p.Result{"", "one"}},
-		{"lone zero", args{"0"}, p.Result{"0", ""}},
-		{"single digit int", args{"5"}, p.Result{"5", ""}},
-		{"negative int", args{"-5"}, p.Result{"-5", ""}},
-		{"multiple digit int", args{"42"}, p.Result{"42", ""}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := p.Int()(tt.args.s); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Int() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-// COMBINATORS
-
-func TestSome(t *testing.T) {
-	type args struct {
 		p p.Parser
 		s string
 	}
 	tests := []struct {
-		name string
-		args args
-		want p.Result
+		name    string
+		args    args
+		want    p.Result
+		wantErr bool
 	}{
-		{"empty string", args{p.Digit(), ""}, p.Result{"", ""}},
-		{"single digit", args{p.Digit(), "1"}, p.Result{"1", ""}},
-		{"multiple digits", args{p.Digit(), "123456"}, p.Result{"123456", ""}},
-		{"non-digit", args{p.Digit(), "a0"}, p.Result{"", "a0"}},
-		{"single digit then non-digit", args{p.Digit(), "0a"}, p.Result{"0", "a"}},
-		{"multiple digits then non-digit", args{p.Digit(), "099a7"}, p.Result{"099", "a7"}},
+		{"empty string", args{p.Int(), ""}, p.Result{}, true},
+		{"miss, malformed int", args{p.Int(), "--42"}, p.Result{}, true},
+		{"miss, letter in first pos", args{p.Int(), "a42"}, p.Result{}, true},
+		{"hit positive", args{p.Int(), "42"}, p.Result{42}, false},
+		{"hit negative", args{p.Int(), "-42"}, p.Result{-42}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := p.Some(tt.args.p)(tt.args.s); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Some() = %v, want %v", got, tt.want)
+			got, err := p.Parse(tt.args.p, tt.args.s)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Int() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Int() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -126,51 +168,57 @@ func TestSome(t *testing.T) {
 
 func TestOneOf(t *testing.T) {
 	type args struct {
-		p1 p.Parser
-		p2 p.Parser
-		s  string
+		p p.Parser
+		s string
 	}
 	tests := []struct {
-		name string
-		args args
-		want p.Result
+		name    string
+		args    args
+		want    p.Result
+		wantErr bool
 	}{
-		{"empty string", args{p.Digit(), p.Rune('a'), ""}, p.Result{}},
-		{"no hit", args{p.Digit(), p.Rune('a'), "bc"}, p.Result{"", "bc"}},
-		{"first hit", args{p.Digit(), p.Rune('a'), "1a"}, p.Result{"1", "a"}},
-		{"second hit", args{p.Digit(), p.Rune('a'), "a1"}, p.Result{"a", "1"}},
-		{"both hit", args{p.Digit(), p.Rune('1'), "1a"}, p.Result{"1", "a"}},
+		{"empty string", args{p.OneOf([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), ""}, p.Result{}, true},
+		{"first is a match", args{p.OneOf([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "abc"}, p.Result{"a"}, false},
+		{"second is a match", args{p.OneOf([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "bca"}, p.Result{"b"}, false},
+		{"no match", args{p.OneOf([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "d"}, p.Result{}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := p.OneOf(tt.args.p1, tt.args.p2)(tt.args.s); !reflect.DeepEqual(got, tt.want) {
+			got, err := p.Parse(tt.args.p, tt.args.s)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("OneOf() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("OneOf() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestPipe(t *testing.T) {
+func TestSequence(t *testing.T) {
 	type args struct {
-		ps []p.Parser
-		s  string
+		p p.Parser
+		s string
 	}
 	tests := []struct {
-		name string
-		args args
-		want p.Result
+		name    string
+		args    args
+		want    p.Result
+		wantErr bool
 	}{
-		{"empty string", args{[]p.Parser{p.Digit(), p.Rune('a')}, ""}, p.Result{}},
-		{"no hit", args{[]p.Parser{p.Digit(), p.Rune('a')}, "bc"}, p.Result{"", "bc"}},
-		{"first hit", args{[]p.Parser{p.Digit(), p.Rune('a')}, "1b"}, p.Result{"1", "b"}},
-		{"second hit", args{[]p.Parser{p.Digit(), p.Rune('a')}, "a1"}, p.Result{"a", "1"}},
-		{"all hit", args{[]p.Parser{p.Digit(), p.Rune('a'), p.Rune('b'), p.Rune('c')}, "1abc"}, p.Result{"1abc", ""}},
-		{"all hit except one in the middle", args{[]p.Parser{p.Digit(), p.Rune('a'), p.Rune('b'), p.Rune('c')}, "1bc"}, p.Result{"1bc", ""}},
+		{"empty string", args{p.Sequence([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), ""}, p.Result{}, true},
+		{"match", args{p.Sequence([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "abcd"}, p.Result{"a", "b", "c"}, false},
+		{"missing first", args{p.Sequence([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "bcd"}, p.Result{}, true},
+		{"missing last", args{p.Sequence([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "ab"}, p.Result{}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := p.Pipe(tt.args.ps)(tt.args.s); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Pipe() = %v, want %v", got, tt.want)
+			got, err := p.Parse(tt.args.p, tt.args.s)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Sequence() error = %v, wantErr %v\result was %v", err, tt.wantErr, got)
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Sequence() = %v, want %v", got, tt.want)
 			}
 		})
 	}
