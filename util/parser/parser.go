@@ -132,11 +132,21 @@ func Sequence(ps []Parser) Parser {
 
 // UTILITIES
 
-// Parse Parser
+// Parse string with Parser. Accept unparsed string upon completion
 func Parse(p Parser, str string) (Result, error) {
 	state := State{index: 0, input: str, Res: Result{}}
-	res, err := p(state)
-	return res.Res, err
+	endState, err := p(state)
+	return endState.Res, err
+}
+
+// Parse string with Parser. Does NOT accept unparsed string upon completion
+func ParseAll(p Parser, str string) (Result, error) {
+	state := State{index: 0, input: str, Res: Result{}}
+	endState, err := p(state)
+	if endState.index < len(state.input) {
+		return state.Res, fmt.Errorf("did not consume entire input. last index is %d out of %d", endState.index, len(state.input))
+	}
+	return endState.Res, err
 }
 
 // Run a function on all instances of result

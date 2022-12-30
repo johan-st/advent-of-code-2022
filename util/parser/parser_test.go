@@ -215,10 +215,40 @@ func TestSequence(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := p.Parse(tt.args.p, tt.args.s)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Sequence() error = %v, wantErr %v\result was %v", err, tt.wantErr, got)
+				t.Errorf("Sequence() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Sequence() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestParseAll(t *testing.T) {
+	type args struct {
+		p p.Parser
+		s string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    p.Result
+		wantErr bool
+	}{
+		{"empty string", args{p.Sequence([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), ""}, p.Result{}, true},
+		{"error, input left", args{p.Sequence([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "abcd"}, p.Result{}, true},
+		{"missing first", args{p.Sequence([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "bcd"}, p.Result{}, true},
+		{"missing last", args{p.Sequence([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "ab"}, p.Result{}, true},
+		{"exact match", args{p.Sequence([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "abc"}, p.Result{"a", "b", "c"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := p.ParseAll(tt.args.p, tt.args.s)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ParseAll() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ParseAll() = %v, want %v", got, tt.want)
 			}
 		})
 	}
