@@ -7,12 +7,13 @@ import (
 )
 
 /*
-A Parser for things,
+type signature for parsers
+"A Parser for things,
 Is a function from string,
 To lists of pairs,
-Of things and strings.
+Of things and strings."
 */
-type Parser func(State) (State, error)
+type T func(State) (State, error)
 
 type State struct {
 	index int
@@ -24,7 +25,7 @@ type Result []any
 // BASE PARSERS
 
 // parse a single digit
-func Digit() Parser {
+func Digit() T {
 	return func(s State) (State, error) {
 		if len(s.input) <= s.index {
 			return s, fmt.Errorf("expected a Digit at index %d but got unexpected end of input", s.index)
@@ -39,7 +40,7 @@ func Digit() Parser {
 }
 
 // parse a single rune
-func Rune(r rune) Parser {
+func Rune(r rune) T {
 	return func(s State) (State, error) {
 		if len(s.input) <= s.index {
 			return s, fmt.Errorf("expected the rune '%s' at index %d but got unexpected end of input", string(r), s.index)
@@ -55,14 +56,14 @@ func Rune(r rune) Parser {
 // EXTENDED PARSERS
 
 // one or more digits
-func Digits() Parser {
+func Digits() T {
 	return Some1(Digit())
 }
 
 // Parse an integer
-func Int() Parser {
-	return OneOf([]Parser{
-		Sequence([]Parser{
+func Int() T {
+	return OneOf([]T{
+		Sequence([]T{
 			Rune('-'),
 			Digits(),
 		}),
@@ -73,7 +74,7 @@ func Int() Parser {
 // COMBINATORS
 
 // parse zero or more. Never fails
-func Some(p Parser) Parser {
+func Some(p T) T {
 	return func(s State) (State, error) {
 		err := error(nil)
 		for err == nil {
@@ -84,7 +85,7 @@ func Some(p Parser) Parser {
 }
 
 // parse one or more
-func Some1(p Parser) Parser {
+func Some1(p T) T {
 	return func(s State) (State, error) {
 		originalState := s
 		err := error(nil)
@@ -103,7 +104,7 @@ func Some1(p Parser) Parser {
 }
 
 // Try several parsers and return the first match
-func OneOf(ps []Parser) Parser {
+func OneOf(ps []T) T {
 	return func(s State) (State, error) {
 		for _, p := range ps {
 			if ns, err := p(s); err == nil {
@@ -116,7 +117,7 @@ func OneOf(ps []Parser) Parser {
 }
 
 // Run the string through all parsers in order. Returns an error if any of them failes
-func Sequence(ps []Parser) Parser {
+func Sequence(ps []T) T {
 	return func(s State) (State, error) {
 		s2 := s
 		for _, p := range ps {
@@ -133,14 +134,14 @@ func Sequence(ps []Parser) Parser {
 // UTILITIES
 
 // Parse string with Parser. Accept unparsed string upon completion
-func Parse(p Parser, str string) (Result, error) {
+func Parse(p T, str string) (Result, error) {
 	state := State{index: 0, input: str, Res: Result{}}
 	endState, err := p(state)
 	return endState.Res, err
 }
 
 // Parse string with Parser. Does NOT accept unparsed string upon completion
-func ParseAll(p Parser, str string) (Result, error) {
+func ParseAll(p T, str string) (Result, error) {
 	state := State{index: 0, input: str, Res: Result{}}
 	endState, err := p(state)
 	if endState.index < len(state.input) {
@@ -150,7 +151,7 @@ func ParseAll(p Parser, str string) (Result, error) {
 }
 
 // Run a function on all instances of result
-func (p Parser) Map(fn func(any) any) Parser {
+func (p T) Map(fn func(any) any) T {
 	return func(s State) (State, error) {
 		s2, err := p(s)
 		if err != nil {
@@ -166,7 +167,7 @@ func (p Parser) Map(fn func(any) any) Parser {
 	}
 }
 
-func (p Parser) Concat() Parser {
+func (p T) Concat() T {
 	return func(s State) (State, error) {
 		newS, err := p(s)
 		if err != nil {
@@ -203,4 +204,12 @@ func toInt(s any) any {
 	default:
 		return s
 	}
+}
+
+func (p T) Debug() T {
+	return func(s State) (State, error) {
+		fmt.Printf("DEBUG\nstate.index: %d\nstate.input: %s\nstate.Res: %v", s.index, s.input, s.Res)
+		return p(s)
+	}
+
 }
