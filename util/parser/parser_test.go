@@ -9,11 +9,6 @@ import (
 
 // PARSERS
 
-// DEBUG CODE GOES HERE
-// TODO: REMOVE BEFORE COMMIT
-
-// DEBUG END
-
 func TestDigit(t *testing.T) {
 	type args struct {
 		s string
@@ -54,7 +49,7 @@ func TestDigit(t *testing.T) {
 
 func TestDigits(t *testing.T) {
 	type args struct {
-		p p.Parser
+		p p.T
 		s string
 	}
 	tests := []struct {
@@ -82,7 +77,7 @@ func TestDigits(t *testing.T) {
 
 func TestSome(t *testing.T) {
 	type args struct {
-		p p.Parser
+		p p.T
 		s string
 	}
 	tests := []struct {
@@ -110,7 +105,7 @@ func TestSome(t *testing.T) {
 
 func TestRune(t *testing.T) {
 	type args struct {
-		p p.Parser
+		p p.T
 		s string
 	}
 	tests := []struct {
@@ -138,7 +133,7 @@ func TestRune(t *testing.T) {
 
 func TestInt(t *testing.T) {
 	type args struct {
-		p p.Parser
+		p p.T
 		s string
 	}
 	tests := []struct {
@@ -168,7 +163,7 @@ func TestInt(t *testing.T) {
 
 func TestOneOf(t *testing.T) {
 	type args struct {
-		p p.Parser
+		p p.T
 		s string
 	}
 	tests := []struct {
@@ -177,10 +172,10 @@ func TestOneOf(t *testing.T) {
 		want    p.Result
 		wantErr bool
 	}{
-		{"empty string", args{p.OneOf([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), ""}, p.Result{}, true},
-		{"first is a match", args{p.OneOf([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "abc"}, p.Result{"a"}, false},
-		{"second is a match", args{p.OneOf([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "bca"}, p.Result{"b"}, false},
-		{"no match", args{p.OneOf([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "d"}, p.Result{}, true},
+		{"empty string", args{p.OneOf([]p.T{p.Rune('a'), p.Rune('b'), p.Rune('c')}), ""}, p.Result{}, true},
+		{"first is a match", args{p.OneOf([]p.T{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "abc"}, p.Result{"a"}, false},
+		{"second is a match", args{p.OneOf([]p.T{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "bca"}, p.Result{"b"}, false},
+		{"no match", args{p.OneOf([]p.T{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "d"}, p.Result{}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -197,7 +192,7 @@ func TestOneOf(t *testing.T) {
 
 func TestSequence(t *testing.T) {
 	type args struct {
-		p p.Parser
+		p p.T
 		s string
 	}
 	tests := []struct {
@@ -206,10 +201,10 @@ func TestSequence(t *testing.T) {
 		want    p.Result
 		wantErr bool
 	}{
-		{"empty string", args{p.Sequence([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), ""}, p.Result{}, true},
-		{"match", args{p.Sequence([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "abcd"}, p.Result{"a", "b", "c"}, false},
-		{"missing first", args{p.Sequence([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "bcd"}, p.Result{}, true},
-		{"missing last", args{p.Sequence([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "ab"}, p.Result{}, true},
+		{"empty string", args{p.Sequence([]p.T{p.Rune('a'), p.Rune('b'), p.Rune('c')}), ""}, p.Result{}, true},
+		{"match", args{p.Sequence([]p.T{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "abcd"}, p.Result{"a", "b", "c"}, false},
+		{"missing first", args{p.Sequence([]p.T{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "bcd"}, p.Result{}, true},
+		{"missing last", args{p.Sequence([]p.T{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "ab"}, p.Result{}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -226,7 +221,7 @@ func TestSequence(t *testing.T) {
 
 func TestParseAll(t *testing.T) {
 	type args struct {
-		p p.Parser
+		p p.T
 		s string
 	}
 	tests := []struct {
@@ -235,11 +230,11 @@ func TestParseAll(t *testing.T) {
 		want    p.Result
 		wantErr bool
 	}{
-		{"empty string", args{p.Sequence([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), ""}, p.Result{}, true},
-		{"error, input left", args{p.Sequence([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "abcd"}, p.Result{}, true},
-		{"missing first", args{p.Sequence([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "bcd"}, p.Result{}, true},
-		{"missing last", args{p.Sequence([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "ab"}, p.Result{}, true},
-		{"exact match", args{p.Sequence([]p.Parser{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "abc"}, p.Result{"a", "b", "c"}, false},
+		{"empty string", args{p.Sequence([]p.T{p.Rune('a'), p.Rune('b'), p.Rune('c')}), ""}, p.Result{}, true},
+		{"error, input left", args{p.Sequence([]p.T{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "abcd"}, p.Result{}, true},
+		{"missing first", args{p.Sequence([]p.T{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "bcd"}, p.Result{}, true},
+		{"missing last", args{p.Sequence([]p.T{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "ab"}, p.Result{}, true},
+		{"exact match", args{p.Sequence([]p.T{p.Rune('a'), p.Rune('b'), p.Rune('c')}), "abc"}, p.Result{"a", "b", "c"}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
