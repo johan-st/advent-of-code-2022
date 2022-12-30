@@ -206,10 +206,12 @@ func toInt(s any) any {
 	}
 }
 
-func (p T) Debug() T {
+func (p T) Debug(lable string) T {
 	return func(s State) (State, error) {
-		fmt.Printf("DEBUG\nstate.index: %d\nstate.input: %s\nstate.Res: %v", s.index, s.input, s.Res)
-		return p(s)
+		fmt.Printf("\n_before_ %s\nstate.index: %d\nstate.input: %s\nstate.Res: %v\n", lable, s.index, s.input, s.Res)
+		s, err := p(s)
+		fmt.Printf("\n_after_ %s\nstate.index: %d\nstate.input: %s\nstate.Res: %v\nerr:%v\n", lable, s.index, s.input, s.Res, err)
+		return s, err
 	}
 
 }
